@@ -8,30 +8,26 @@ class WHMAKER:
 
     def createmenu(self, master):
         '''This function creates top level menu'''
+        def character():
+            '''interim function to call CHARGEN class'''
+            ms.CHARGEN(self.content)
         self.chargen = tk.Button(master, text="Character Creation",
-                                 command=ms.CHARGEN(self.content))
+                                 command=character)
         self.chargen.grid(row=0, column=1)
 
     def createquit(self, master):
         '''This method will generate down level menu'''
         self.quit = tk.Button(master, text="Quit", command=self.frame.quit)
         self.quit.grid(row=0, column=1)
-        self.about = tk.Button(master, text="About", command=self.infodialog)
+        self.about = tk.Button(master, text="About", command=infodialog)
         self.about.grid(row=0, column=2)
-
-    def infodialog(self):
-        '''function that displays about message'''
-        tk.messagebox.showinfo("About", "WH character maker")
 
     def __init__(self, master):
         self.frame = tk.Frame(master)
-        self.frame.grid()
-
-        self.maintitle = tk.Label(self.frame, text="Warhammer Character Maker")
-        self.maintitle.grid(row=0)
+        self.frame.pack()
 
         self.mainmenu = tk.Frame(self.frame)
-        self.mainmenu.grid(row=1)
+        self.mainmenu.grid(row=1, pady=10)
         self.content = tk.Frame(self.frame)
         self.content.grid(row=2)
         self.createmenu(self.mainmenu)
@@ -48,7 +44,13 @@ def main():
     root.geometry("1280x720")
 
     app = WHMAKER(root)
+    maintitle = tk.Label(app.frame, text="Warhammer Character Maker")
+    maintitle.grid(row=0)
     root.mainloop()
+
+def infodialog():
+    '''function that displays about message'''
+    messagebox.showinfo("About", "WH character maker")
 
 if __name__ == "__main__":
     main()
