@@ -1,6 +1,7 @@
 '''This program will generate characters for WHRP'''
 import tkinter as tk
 from tkinter import messagebox
+import atexit
 import menus as ms
 import data
 
@@ -46,6 +47,7 @@ def main():
     root = tk.Tk()
     root.title("Warhammer Character Maker")
     root.geometry("1280x720")
+    atexit.register(exit_handler)
     app = WHMAKER(root, lang)
     maintitle = tk.Label(app.frame, text="Warhammer Character Maker")
     maintitle.grid(row=0)
@@ -54,6 +56,10 @@ def main():
 def infodialog():
     '''function that displays about message'''
     messagebox.showinfo("About", "WH character maker")
+
+def exit_handler():
+    '''App exit handler'''
+    data.closedb()
 
 if __name__ == "__main__":
     main()
