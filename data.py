@@ -11,3 +11,7 @@ def getmenutext(text, lang):
                    (text, lang))
     new_text = cursor.fetchone()
     return new_text[0]
+
+def closedb():
+    '''This functon closes db on app exit'''
+    DBASE.close()
