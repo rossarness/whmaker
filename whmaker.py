@@ -9,13 +9,13 @@ class WHMAKER:
 
     def appinit(self, master, lang="en"):
         '''Main initialization function for tk application'''
-        self.frame = tk.Frame(master)
-        self.frame.pack()
+        frame = tk.Frame(master)
+        frame.pack()
         lang_txt = data.getmenutext('lang_txt', lang)
-        self.langbtn = tk.Button(self.frame, text=lang_txt, command=self.regenui, height=1)
-        self.langbtn.grid(row=0, column=5, padx=1, pady=2)
-        self.language = ms.LANGUAGE(self.frame, lang)
-        self.menu = ms.MAINMENU(self.frame, lang)
+        langbtn = tk.Button(frame, text=lang_txt, command=self.regenui, height=1)
+        langbtn.grid(row=0, column=5, padx=1, pady=2)
+        self.language = ms.LANGUAGE(frame, lang)
+        self.menu = ms.MAINMENU(frame, lang)
 
     def regenui(self):
         '''This method will regenerate ui of the application'''
