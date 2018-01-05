@@ -26,7 +26,7 @@ class WHMAKER:
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Warhammer Character Maker")
-        self.root.geometry("1280x720")
+        self.root.geometry("1000x500")
         self.appinit(self.root)
         self.root.mainloop()
 
