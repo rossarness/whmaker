@@ -27,12 +27,26 @@ def getstatsdesc(lang):
 def getlanguages():
     '''This function will return all languages supported by the application'''
     cursor = DBASE.cursor()
-    cursor.execute('''SELECT lang from languages''')
+    cursor.execute('''SELECT name from languages''')
     rows = cursor.fetchall()
     result = []
     for row in rows:
         result.append(row[0])
     return result
+
+def maplanguage(name):
+    '''This function will return lang_id based on name'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT lang FROM languages WHERE name=?''', (name, ))
+    lang = cursor.fetchone()
+    return lang[0]
+
+def getlangname(lang):
+    '''This function will return lang_name based on lang'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM languages WHERE lang=?''', (lang, ))
+    name = cursor.fetchone()
+    return name[0]
 
 def closedb():
     '''This functon closes db on app exit'''

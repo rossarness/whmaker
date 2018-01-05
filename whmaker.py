@@ -11,16 +11,17 @@ class WHMAKER:
         '''Main initialization function for tk application'''
         self.frame = tk.Frame(master)
         self.frame.pack()
-        self.lang_txt = data.getmenutext('lang_txt', lang)
-        self.langbtn = tk.Button(self.frame, text=self.lang_txt, command=self.regenui, height=1)
+        lang_txt = data.getmenutext('lang_txt', lang)
+        self.langbtn = tk.Button(self.frame, text=lang_txt, command=self.regenui, height=1)
         self.langbtn.grid(row=0, column=5, padx=1, pady=2)
-        ms.LANGUAGE(self.frame, lang)
-        ms.MAINMENU(self.frame, lang)
+        self.language = ms.LANGUAGE(self.frame, lang)
+        self.menu = ms.MAINMENU(self.frame, lang)
 
     def regenui(self):
         '''This method will regenerate ui of the application'''
+        lang = self.language.getlanguage()
         ms.cleanup(self.root)
-        self.appinit(self.root)
+        self.appinit(self.root, lang)
 
     def __init__(self):
         self.root = tk.Tk()
