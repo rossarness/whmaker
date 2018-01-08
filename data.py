@@ -6,11 +6,17 @@ DBASE = sql.connect('data/whdb')
 def getmenutext(text, lang):
     '''This function will fetch menu text for menu entry
     It will return only first value and one column'''
+    result = []
     cursor = DBASE.cursor()
     cursor.execute('''SELECT name FROM labels WHERE field_id=? AND lang=?''',
                    (text, lang))
-    new_text = cursor.fetchone()
-    return new_text[0]
+    try:
+        new_text = cursor.fetchone()
+        result.append(new_text[0])
+    except TypeError:
+        print("Description for menu " + text + " not found")
+        result.append(text)
+    return result[0]
 
 def getstatsdesc(lang):
     '''This function will return Array with all stats names in requested language'''
@@ -18,11 +24,15 @@ def getstatsdesc(lang):
     cursor = DBASE.cursor()
     result = []
     for stat in stats:
-        cursor.execute('''SELECT name FROM labels
-                    WHERE field_id=?
-                    AND lang=? ORDER BY position ASC;''', (stat, lang,))
-        raw = cursor.fetchone()
-        result.append(raw[0])
+        try:
+            cursor.execute('''SELECT name FROM labels
+                        WHERE field_id=?
+                        AND lang=? ORDER BY position ASC;''', (stat, lang,))
+            raw = cursor.fetchone()
+            result.append(raw[0])
+        except TypeError:
+            print("Unable to get label in " + lang + " for: " + stat)
+            result.append(stat)
     return result
 
 def getlanguages():
@@ -58,7 +68,12 @@ def getraces(lang):
     cursor = DBASE.cursor()
     cursor.execute('''SELECT name FROM races WHERE lang=?''', (lang, ))
     raw = cursor.fetchall()
-    return formatresult(raw)
+    try:
+        result = formatresult(raw)
+    except TypeError:
+        print("Unable to get label in English")
+        result = getraces("en")
+    return result
 
 def formatresult(raw):
     '''This function will format the result into pretty list'''
