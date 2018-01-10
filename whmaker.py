@@ -9,25 +9,25 @@ class WHMAKER:
 
     def appinit(self, master, lang="en"):
         '''Main initialization function for tk application'''
-        frame = tk.Frame(master)
-        frame.pack()
         lang_txt = data.getmenutext('lang_txt', lang)
-        langbtn = tk.Button(frame, text=lang_txt, command=self.regenui, height=1)
-        langbtn.grid(row=0, column=5, padx=1, pady=2)
-        self.language = ms.LANGUAGE(frame, lang)
-        self.menu = ms.MAINMENU(frame, lang)
+        langbtn = tk.Button(master, text=lang_txt, command=self.regenui)
+        langbtn.place(width=125, height=25, y=15, x=660)
+        self.language = ms.LANGUAGE(master, lang)
+        self.menu = ms.MAINMENU(master, lang)
 
     def regenui(self):
         '''This method will regenerate ui of the application'''
         lang = self.language.getlanguage()
+        self.language.setactive(lang)
         ms.cleanup(self.root)
         self.appinit(self.root, lang)
 
     def __init__(self):
         self.root = tk.Tk()
         self.root.title("Warhammer Character Maker")
-        self.root.geometry("1000x500")
-        self.appinit(self.root)
+        self.root.geometry("1000x700")
+        lang = data.getactive()
+        self.appinit(self.root, lang)
         self.root.mainloop()
 
 def main():

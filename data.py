@@ -85,12 +85,30 @@ def formatresult(raw):
 def setactive(lang):
     '''This function will set current language as active'''
     cursor = DBASE.cursor()
-    cursor.execute('''SELECT name FROM languages WHERE is_active="1"''')
-    raw_old = cursor.fetchone()
-    old_lang = raw_old[0]
-    if raw_old != lang:
-        cursor.execute('''UPDATE languages SET is_active="0" WHERE is_active="1"''')
-        cursor.execute()
+    cursor.execute('''SELECT lang FROM languages WHERE is_active="1"''')
+    old_lang = None
+    try:
+        raw_old = cursor.fetchone()
+        old_lang = raw_old[0]
+    except TypeError:
+        print("ERROR: No Language is active")
+    if old_lang is not None:
+        cursor.execute('''UPDATE languages SET is_active="0" WHERE lang=?''', (old_lang, ))
+        DBASE.commit()
+    cursor.execute('''UPDATE languages SET is_active=1 WHERE lang=?''', (lang, ))
+    DBASE.commit()
+
+def getactive():
+    '''This function returns currently active language'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT lang FROM languages WHERE is_active="1"''')
+    try:
+        raw = cursor.fetchone()
+        lang = raw[0]
+    except TypeError:
+        print("ERROR: No Language is active")
+        lang = "en"
+    return lang
 
 def closedb():
     '''This functon closes db on app exit'''
