@@ -1,3 +1,4 @@
+
 '''All menus are defined as distinct classes here'''
 import tkinter as tk
 from tkinter import messagebox
@@ -15,7 +16,7 @@ class CHARGEN:
     '''This is character generation class'''
 
     def generatestats(self):
-        '''This method will generate random statistics for WHFRP character'''
+        '''This method will generate random statistics for WFRP character'''
         statid = 0
         while statid < 8:
             stat = randint(1, 20)
@@ -26,16 +27,30 @@ class CHARGEN:
                 print("Index error on: " + str(statid))
             self.charstats[attr] = stat
             statid = statid + 1
+        self.racecheck()
+        self.relatedskills()
         self.generatelables(self.character)
+
+    def generatedetails(self):
+        '''This function will generate all personal details for the character'''
+
+    def relatedskills(self):
+        '''This function calculates skills which are related to other stats'''
+        if self.charstats['s'] is not None:
+            strength = self.charstats['s']
+            strength = str(strength)
+            strength = strength[0][:1]
+            print(strength)
 
     def generatelables(self, master):
         '''This function will generate static labels for character generation menu'''
         labels = data.getstatsdesc(self.lang)
         generatelabels(master, labels)
+        stats = data.getvisiblestats()
         #Code below generates canvas for stats
-        for statid in range(2, 20):
+        for statid in range(2, 19):
             stat = statid - 2
-            statval = self.stats[stat]
+            statval = stats[stat]
             statistic = " "
             if self.charstats['ws'] != None:
                 statistic = self.charstats[statval]
@@ -46,14 +61,14 @@ class CHARGEN:
             elif statid <= 9:
                 i = statid - 4
                 labl.grid(row=i, column="3", pady="5", padx="5")
-            elif statid <= 12:
-                i = statid - 7
+            elif statid <= 11:
+                i = statid - 6
                 labl.grid(row=i, column="6", pady="5", padx="5")
-            elif statid <= 15:
-                i = statid - 11
+            elif statid <= 14:
+                i = statid - 10
                 labl.grid(row=i, column="8", pady="5", padx="5")
-            elif statid <= 18:
-                i = statid - 14
+            elif statid <= 17:
+                i = statid - 13
                 labl.grid(row=i, column="10", pady="5", padx="5")
         birthplace = " "
         birthlbl = tk.Label(master, text=birthplace, bg="white",
@@ -61,12 +76,57 @@ class CHARGEN:
         birthlbl.grid(row=5, column=8, pady="5", padx="5",
                       columnspan=3, sticky="w")
 
+    def racecheck(self):
+        '''This method checks what race is selected and applies stat changes'''
+        race = self.raceval.get()
+        race_id = data.maprace(race, self.lang)
+        self.charstats["race"] = race
+        if self.charstats["ws"] is not None:
+            if race_id == "humn":
+                print(race)
+            elif race_id == "elvs":
+                self.charstats["bs"] = self.charstats["bs"] + 10
+                self.charstats["ag"] = self.charstats["ag"] + 10
+            elif race_id == "dwrs":
+                self.charstats["ws"] = self.charstats["ws"] + 10
+                self.charstats["t"] = self.charstats["t"] + 10
+                self.charstats["ag"] = self.charstats["ag"] - 10
+                self.charstats["fel"] = self.charstats["fel"] - 10
+            elif race_id == "hwfl":
+                self.charstats["ws"] = self.charstats["ws"] - 10
+                self.charstats["s"] = self.charstats["s"] - 10
+                self.charstats["t"] = self.charstats["t"] - 10
+                self.charstats["ag"] = self.charstats["ag"] + 10
+                self.charstats["fel"] = self.charstats["fel"] + 10
+                self.charstats["fel"] = self.charstats["bs"] + 10
+
     def racechanged(self, index, value, operation):
         '''This method handles race change event'''
         print("Race changed to: " + value + " index: " + index +
               " opertation: " + operation)
-        print("Value in box is: " + self.raceval.get())
-        print("Value in the variable is: " + str(self.raceval))
+        old_race = self.charstats["race"]
+        old_race_id = data.maprace(old_race, self.lang)
+        if self.charstats["ws"] is not None:
+            if old_race_id == "humn":
+                print(old_race)
+            elif old_race_id == "elvs":
+                self.charstats["bs"] = self.charstats["bs"] - 10
+                self.charstats["ag"] = self.charstats["ag"] - 10
+            elif old_race_id == "dwrs":
+                self.charstats["ws"] = self.charstats["ws"] - 10
+                self.charstats["t"] = self.charstats["t"] - 10
+                self.charstats["ag"] = self.charstats["ag"] + 10
+                self.charstats["fel"] = self.charstats["fel"] + 10
+            elif old_race_id == "hwfl":
+                self.charstats["ws"] = self.charstats["ws"] + 10
+                self.charstats["s"] = self.charstats["s"] + 10
+                self.charstats["t"] = self.charstats["t"] + 10
+                self.charstats["ag"] = self.charstats["ag"] - 10
+                self.charstats["fel"] = self.charstats["fel"] - 10
+                self.charstats["fel"] = self.charstats["bs"] - 10
+        self.racecheck()
+        self.relatedskills()
+        self.generatelables(self.character)
 
 
     def __init__(self, master, lang):
@@ -90,10 +150,16 @@ class CHARGEN:
         generatech.grid(row=0, column="2", pady="5")
         self.raceval = tk.StringVar()
         self.raceval.trace("w", self.racechanged)
-        self.raceval.set("Human")
+        defaultrace = data.getrace("humn", self.lang)
+        self.charstats["race"] = defaultrace
+        self.raceval.set(defaultrace)
         race = ttk.Combobox(self.character, textvariable=self.raceval,
                             values=self.races, state="readonly", width=7)
         race.grid(row="2", column="6", padx="5")
+        genders = data.getgenders(self.lang)
+        gender = ttk.Combobox(self.character, values=genders, state="readonly", width=7)
+        gender.grid(row="3", column="6", padx="5")
+        gender.set(data.getmenutext("male", self.lang))
         proftxt = data.getmenutext("prof_txt", lang)
         proflabel = tk.Label(self.character, text=proftxt)
         proflabel.grid(row="0", column="3", padx=10, columnspan=2, sticky="e")
