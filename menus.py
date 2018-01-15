@@ -29,10 +29,16 @@ class CHARGEN:
             statid = statid + 1
         self.racecheck()
         self.relatedskills()
+        self.generatedetails()
         self.generatelables(self.character)
 
     def generatedetails(self):
         '''This function will generate all personal details for the character'''
+        hair = randint(1, 10)
+        self.charstats["hair"] = hair
+        age = randint(1, 20)
+        self.charstats['age'] = age
+
 
     def relatedskills(self):
         '''This function calculates skills which are related to other stats'''
@@ -45,31 +51,37 @@ class CHARGEN:
     def generatelables(self, master):
         '''This function will generate static labels for character generation menu'''
         labels = data.getstatsdesc(self.lang)
+        race = self.charstats['race']
         generatelabels(master, labels)
         stats = data.getvisiblestats()
+        padd = [3, 3]
         #Code below generates canvas for stats
         for statid in range(2, 19):
             stat = statid - 2
             statval = stats[stat]
             statistic = " "
-            if self.charstats['ws'] != None:
+            if statval == 'hair' and self.charstats['hair'] != None:
+                statistic = data.gethair(self.lang, self.charstats['hair'], race)
+            elif statval == 'age' and self.charstats['age'] != None:
+                statistic = data.getage(self.lang, self.charstats['age'], race)
+            elif self.charstats['ws'] != None:
                 statistic = self.charstats[statval]
             labl = tk.Label(master, text=statistic, bg="white",
-                            fg="black", bd="10", width="5")
+                            fg="black", bd="10", width="8")
             if statid <= 5:
-                labl.grid(row=statid, column="1", pady="5", padx="5")
+                labl.grid(row=statid, column="1", pady=padd[0], padx=padd[1])
             elif statid <= 9:
                 i = statid - 4
-                labl.grid(row=i, column="3", pady="5", padx="5")
+                labl.grid(row=i, column="3", pady=padd[0], padx=padd[1])
             elif statid <= 11:
                 i = statid - 6
-                labl.grid(row=i, column="6", pady="5", padx="5")
+                labl.grid(row=i, column="6", pady=padd[0], padx=padd[1])
             elif statid <= 14:
                 i = statid - 10
-                labl.grid(row=i, column="8", pady="5", padx="5")
+                labl.grid(row=i, column="8", pady=padd[0], padx=padd[1])
             elif statid <= 17:
                 i = statid - 13
-                labl.grid(row=i, column="10", pady="5", padx="5")
+                labl.grid(row=i, column="10", pady=padd[0], padx=padd[1])
         birthplace = " "
         birthlbl = tk.Label(master, text=birthplace, bg="white",
                             fg="black", bd="10", width="15")
@@ -278,5 +290,8 @@ def generatelabels(master, labels):
         elif pos > 4 and col == 7:
             pos = 2
             col = 9
+        elif pos > 4 and col == 9:
+            pos = 8
+            col = 2
         else:
             pos = pos + 1

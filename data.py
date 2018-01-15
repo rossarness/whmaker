@@ -156,6 +156,32 @@ def getgenders(lang):
         genders = getgenders("en")
     return genders
 
+def gethair(lang, color_id, race):
+    '''This function will return request hair color name
+    It checks language, color_id and race
+    Returns a string with color name'''
+    raceid = maprace(race, lang)
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM hair_color
+                      WHERE race=? AND lang=?
+                      AND color_id=?''', (raceid, lang, color_id, ))
+    try:
+        raw = cursor.fetchone()
+        color = raw[0]
+    except TypeError:
+        print("ERROR: Invalid hair color value: " + str(color_id) + " Race: "
+              + str(race) + " lang: " + str(lang))
+        color = "Undefined"
+    return color
+
+def getage(lang, age_id, race):
+    '''This function will return age based on age_id and race'''
+    cursor = DBASE.cursor()
+    race_id = maprace(race, lang)
+    cursor.execute('''SELECT '''+ race_id +''' FROM character_age WHERE dice_value=?''', (age_id, ))
+    raw = cursor.fetchone()
+    return raw[0]
+
 def closedb():
     '''This functon closes db on app exit'''
     DBASE.close()
