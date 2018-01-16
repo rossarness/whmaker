@@ -18,6 +18,14 @@ def getmenutext(text, lang):
         result.append(text)
     return result[0]
 
+def mapmenutext(text, lang):
+    '''This function returns id of the requested label'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT field_id FROM labels
+                      WHERE name=? AND lang=?''', (text, lang, ))
+    raw = cursor.fetchone()
+    return raw[0]
+
 def getstatsdesc(lang):
     '''This function will return Array with all stats names in requested language'''
     stats = getstats()
@@ -179,6 +187,31 @@ def getage(lang, age_id, race):
     cursor = DBASE.cursor()
     race_id = maprace(race, lang)
     cursor.execute('''SELECT '''+ race_id +''' FROM character_age WHERE dice_value=?''', (age_id, ))
+    raw = cursor.fetchone()
+    return raw[0]
+
+def geteye(lang, color_id, race):
+    '''This function will return requested eye color based on race color_id and laguage.
+    Returns string with a name'''
+    raceid = maprace(race, lang)
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT color FROM eye_color
+                      WHERE race=? AND lang=?
+                      AND color_id=?''', (raceid, lang, color_id, ))
+    try:
+        raw = cursor.fetchone()
+        color = raw[0]
+    except TypeError:
+        print("ERROR: Invalid eye color value: " + str(color_id) + " Race: "
+              + str(race) + " lang: " + str(lang))
+        color = "Undefined"
+    return color
+
+def getweight(lang, weight_id, race):
+    '''This function will return weight based on weight_id and race'''
+    cursor = DBASE.cursor()
+    race_id = maprace(race, lang)
+    cursor.execute('''SELECT '''+ race_id +''' FROM weight WHERE weight_id=?''', (weight_id, ))
     raw = cursor.fetchone()
     return raw[0]
 

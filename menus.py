@@ -29,15 +29,21 @@ class CHARGEN:
             statid = statid + 1
         self.racecheck()
         self.relatedskills()
-        self.generatedetails()
+        self.generate_details()
         self.generatelables(self.character)
 
-    def generatedetails(self):
+    def generate_details(self):
         '''This function will generate all personal details for the character'''
         hair = randint(1, 10)
         self.charstats["hair"] = hair
         age = randint(1, 20)
         self.charstats['age'] = age
+        eye = randint(1, 10)
+        self.charstats["eye"] = eye
+        weight = generateweight()
+        self.charstats["weig"] = weight
+        height = generate_height(self.charstats['gend'], self.charstats['race'], self.lang)
+        self.charstats['heig'] = height
 
 
     def relatedskills(self):
@@ -64,6 +70,10 @@ class CHARGEN:
                 statistic = data.gethair(self.lang, self.charstats['hair'], race)
             elif statval == 'age' and self.charstats['age'] != None:
                 statistic = data.getage(self.lang, self.charstats['age'], race)
+            elif statval == 'eye' and self.charstats['eye'] != None:
+                statistic = data.geteye(self.lang, self.charstats['eye'], race)
+            elif statval == 'weig' and self.charstats['weig'] != None:
+                statistic = data.getweight(self.lang, self.charstats['weig'], race)
             elif self.charstats['ws'] != None:
                 statistic = self.charstats[statval]
             labl = tk.Label(master, text=statistic, bg="white",
@@ -94,16 +104,20 @@ class CHARGEN:
         race_id = data.maprace(race, self.lang)
         self.charstats["race"] = race
         if self.charstats["ws"] is not None:
+            if self.charstats["heig"] is None:
+                self.charstats["heig"] = 0
             if race_id == "humn":
-                print(race)
+                self.charstats["heig"] = self.charstats["heig"] + 150
             elif race_id == "elvs":
                 self.charstats["bs"] = self.charstats["bs"] + 10
                 self.charstats["ag"] = self.charstats["ag"] + 10
+                self.charstats["heig"] = self.charstats["heig"] + 160
             elif race_id == "dwrs":
                 self.charstats["ws"] = self.charstats["ws"] + 10
                 self.charstats["t"] = self.charstats["t"] + 10
                 self.charstats["ag"] = self.charstats["ag"] - 10
                 self.charstats["fel"] = self.charstats["fel"] - 10
+                self.charstats["heig"] = self.charstats["heig"] + 130
             elif race_id == "hwfl":
                 self.charstats["ws"] = self.charstats["ws"] - 10
                 self.charstats["s"] = self.charstats["s"] - 10
@@ -111,6 +125,7 @@ class CHARGEN:
                 self.charstats["ag"] = self.charstats["ag"] + 10
                 self.charstats["fel"] = self.charstats["fel"] + 10
                 self.charstats["fel"] = self.charstats["bs"] + 10
+                self.charstats["heig"] = self.charstats["heig"] + 100
 
     def racechanged(self, index, value, operation):
         '''This method handles race change event'''
@@ -120,15 +135,17 @@ class CHARGEN:
         old_race_id = data.maprace(old_race, self.lang)
         if self.charstats["ws"] is not None:
             if old_race_id == "humn":
-                print(old_race)
+                self.charstats["heig"] = self.charstats["heig"] - 150
             elif old_race_id == "elvs":
                 self.charstats["bs"] = self.charstats["bs"] - 10
                 self.charstats["ag"] = self.charstats["ag"] - 10
+                self.charstats["heig"] = self.charstats["heig"] - 160
             elif old_race_id == "dwrs":
                 self.charstats["ws"] = self.charstats["ws"] - 10
                 self.charstats["t"] = self.charstats["t"] - 10
                 self.charstats["ag"] = self.charstats["ag"] + 10
                 self.charstats["fel"] = self.charstats["fel"] + 10
+                self.charstats["heig"] = self.charstats["heig"] - 130
             elif old_race_id == "hwfl":
                 self.charstats["ws"] = self.charstats["ws"] + 10
                 self.charstats["s"] = self.charstats["s"] + 10
@@ -136,10 +153,38 @@ class CHARGEN:
                 self.charstats["ag"] = self.charstats["ag"] - 10
                 self.charstats["fel"] = self.charstats["fel"] - 10
                 self.charstats["fel"] = self.charstats["bs"] - 10
+                self.charstats["heig"] = self.charstats["heig"] - 100
         self.racecheck()
         self.relatedskills()
         self.generatelables(self.character)
 
+    def genderchanged(self, index, value, operation):
+        '''This method handles gender change event'''
+        print("Gender changed to: " + value + " index: " + index +
+              " opertation: " + operation)
+        if self.charstats['gend'] is not None:
+            old_gender = self.charstats['gend']
+            old_gender_id = data.mapmenutext(old_gender, self.lang)
+        new_gender = self.gendervalue.get()
+        self.charstats['gend'] = new_gender
+        if self.charstats['heig'] is not None:
+            race = self.charstats['race']
+            race_id = data.maprace(race, self.lang)
+            if old_gender_id == "male":
+                if race_id == 'dwrs':
+                    height = self.charstats['heig'] - 15
+                    self.charstats['heig'] = height
+                else:
+                    height = self.charstats['heig'] - 10
+                    self.charstats['heig'] = height
+            elif old_gender_id == "female":
+                if race_id == 'dwrs':
+                    height = self.charstats['heig'] + 15
+                    self.charstats['heig'] = height
+                else:
+                    height = self.charstats['heig'] + 10
+                    self.charstats['heig'] = height
+        self.generatelables(self.character)
 
     def __init__(self, master, lang):
         '''This function will generate characters
@@ -153,11 +198,11 @@ class CHARGEN:
         self.races = data.getraces(self.lang)
         self.character = tk.Frame(master, bg="", bd="1", pady="10")
         self.character.pack()
-        charlabel = data.getmenutext("char_gen_lbl", lang)
-        title = tk.Label(self.character, text=charlabel)
+        label = data.getmenutext("char_gen_lbl", lang)
+        title = tk.Label(self.character, text=label)
         title.grid(row=0, column="0", columnspan="2", sticky="W", padx=5)
-        generatechtxt = data.getmenutext("generate_ch_txt", lang)
-        generatech = tk.Button(self.character, text=generatechtxt,
+        label = data.getmenutext("generate_ch_txt", lang)
+        generatech = tk.Button(self.character, text=label,
                                command=self.generatestats)
         generatech.grid(row=0, column="2", pady="5")
         self.raceval = tk.StringVar()
@@ -168,12 +213,16 @@ class CHARGEN:
         race = ttk.Combobox(self.character, textvariable=self.raceval,
                             values=self.races, state="readonly", width=7)
         race.grid(row="2", column="6", padx="5")
+        self.gendervalue = tk.StringVar()
+        self.gendervalue.trace("w", self.genderchanged)
         genders = data.getgenders(self.lang)
-        gender = ttk.Combobox(self.character, values=genders, state="readonly", width=7)
+        gender = ttk.Combobox(self.character, values=genders, state="readonly",
+                              textvariable=self.gendervalue, width=7)
         gender.grid(row="3", column="6", padx="5")
-        gender.set(data.getmenutext("male", self.lang))
-        proftxt = data.getmenutext("prof_txt", lang)
-        proflabel = tk.Label(self.character, text=proftxt)
+        default_gender = data.getmenutext("male", self.lang)
+        self.gendervalue.set(default_gender)
+        label = data.getmenutext("prof_txt", lang)
+        proflabel = tk.Label(self.character, text=label)
         proflabel.grid(row="0", column="3", padx=10, columnspan=2, sticky="e")
         prof = ttk.Combobox(self.character, textvariable="None", width=40)
         prof.grid(row="0", column="5", columnspan=6, pady=5, padx=5, sticky="e")
@@ -230,7 +279,7 @@ class MAINMENU:
         self.createwelcome(lang)
 
 class LANGUAGE:
-    '''This class will provide language controll for the appliation'''
+    '''This class will provide language controll for the application'''
 
     def __init__(self, master, lang):
         self.langs = data.getlanguages()
@@ -249,6 +298,8 @@ class LANGUAGE:
     def setactive(self, lang):
         '''This method sets language as activly selected'''
         data.setactive(lang)
+        name = data.getlangname(lang)
+        self.langdrop.set(name)
         return lang
 
 def infodialog():
@@ -295,3 +346,108 @@ def generatelabels(master, labels):
             col = 2
         else:
             pos = pos + 1
+
+def generateweight():
+    '''Function that will generate weight and return id to the character stats
+    Due to complex algorithm separate function is required'''
+    initial = randint(1, 100)
+    if initial == 1:
+        weight_id = 1
+    elif initial <= 10:
+        weight_id = 2
+    elif initial <= 20:
+        weight_id = 3
+    elif initial <= 30:
+        weight_id = 4
+    elif initial <= 40:
+        weight_id = 5
+    elif initial <= 50:
+        weight_id = 6
+    elif initial <= 60:
+        weight_id = 7
+    elif initial <= 70:
+        weight_id = 8
+    elif initial <= 80:
+        weight_id = 9
+    elif initial <= 90:
+        weight_id = 10
+    elif initial <= 99:
+        weight_id = 11
+    elif initial == 100:
+        weight_id = 12
+    return weight_id
+
+def generate_height(gender, race, lang):
+    '''Generates height of the character based on gender and race'''
+    print("DEBUG: gender value is: " + gender)
+    genderid = data.mapmenutext(gender, lang)
+    raceid = data.maprace(race, lang)
+    roll1 = randint(1, 10)
+    roll2 = randint(1, 10)
+    totalroll = roll1 + roll2
+    if genderid == "female":
+        if raceid == "humn":
+            height = 150 + totalroll
+        elif raceid == "elvs":
+            height = 160 + totalroll
+        elif raceid == "dwrs":
+            height = 130 + totalroll
+        elif raceid == "hwfl":
+            height = 100 + totalroll
+    elif genderid == "male":
+        if raceid == "humn":
+            height = 160 + totalroll
+        elif raceid == "elvs":
+            height = 170 + totalroll
+        elif raceid == "dwrs":
+            height = 145 + totalroll
+        elif raceid == "hwfl":
+            height = 110 + totalroll
+    return height
+
+def generate_mark():
+    '''This function will generate distinguishing mark for the character'''
+    roll = randint(1, 100)
+    if roll < 6:
+        mark_id = 1
+    elif roll < 11:
+        mark_id = 2
+    elif roll < 16:
+        mark_id = 3
+    elif roll < 21:
+        mark_id = 4
+    elif roll < 26:
+        mark_id = 5
+    elif roll < 30:
+        mark_id = 6
+    elif roll < 36:
+        mark_id = 7
+    elif roll < 40:
+        mark_id = 8
+    elif roll < 46:
+        mark_id = 9
+    elif roll < 51:
+        mark_id = 10
+    elif roll < 56:
+        mark_id = 11
+    elif roll < 61:
+        mark_id = 12
+    elif roll < 66:
+        mark_id = 13
+    elif roll < 71:
+        mark_id = 14
+    elif roll < 76:
+        mark_id = 15
+    elif roll < 81:
+        mark_id = 16
+    elif roll < 85:
+        mark_id = 17
+    elif roll < 90:
+        mark_id = 18
+    elif roll < 95:
+        mark_id = 19
+    elif roll < 99:
+        mark_id = 20
+    else:
+        mark_id = 21
+    return mark_id
