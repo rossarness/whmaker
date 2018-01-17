@@ -67,7 +67,7 @@ def getlangname(lang):
 def getstats():
     '''This function will return all stats for the characters'''
     cursor = DBASE.cursor()
-    cursor.execute('''SELECT name FROM attributes ORDER BY pos''')
+    cursor.execute('''SELECT name FROM attributes WHERE disabled=0 ORDER BY pos''')
     raw = cursor.fetchall()
     return formatresult(raw)
 
@@ -214,6 +214,65 @@ def getweight(lang, weight_id, race):
     cursor.execute('''SELECT '''+ race_id +''' FROM weight WHERE weight_id=?''', (weight_id, ))
     raw = cursor.fetchone()
     return raw[0]
+
+def getmark(lang, mark_id):
+    '''This function will return distinguishing mark based on id and language'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM distinguishing_marks WHERE lang=? AND mark_id=?''',
+                   (lang, mark_id, ))
+    raw = cursor.fetchone()
+    try:
+        mark = raw[0]
+    except TypeError:
+        print("ERROR: Mark not found for id: " + str(mark_id) + " and language: " + lang)
+        mark = "Undefined"
+    return mark
+
+def getbirthplace(place_id, lang):
+    '''Returns birthplaces from DB'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM birthplace
+                      WHERE place_id=? AND lang=?''', (place_id, lang, ))
+    raw = cursor.fetchone()
+    try:
+        result = raw[0]
+    except TypeError:
+        print("ERROR: Birthplace not found for language: " + lang)
+        result = getbirthplace(place_id, "en")
+    return result
+
+def getbirthdetails(detail_id, lang):
+    '''Return birthplace details for human birthplace'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM birthplace_detail
+                      WHERE place_id=? AND lang=?''', (detail_id, lang, ))
+    raw = cursor.fetchone()
+    try:
+        result = raw[0]
+    except TypeError:
+        print("ERROR: Birthplace detail not found for language: " + lang)
+        result = getbirthdetails(detail_id, "en")
+    return result
+
+def getsiblings(race, sib_id):
+    '''Returns number of siblings for given race'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT ''' + race + ''' FROM siblings
+                      WHERE id=?''', (sib_id, ))
+    result = cursor.fetchone()
+    return result[0]
+
+def getstar(star_id, lang):
+    '''Returns star sign for the character in given language'''
+    cursor = DBASE.cursor()
+    cursor.execute('''SELECT name FROM star_sign WHERE lang=? AND sign_id=?''', (lang, star_id, ))
+    raw = cursor.fetchone()
+    try:
+        result = raw[0]
+    except TypeError:
+        print("ERROR: Star sign not found for language: " + lang)
+        result = getstar(star_id, "en")
+    return result
 
 def closedb():
     '''This functon closes db on app exit'''

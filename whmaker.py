@@ -26,6 +26,7 @@ class WHMAKER:
         self.root = tk.Tk()
         self.root.title("Warhammer Character Maker")
         self.root.geometry("1000x700")
+        self.root.resizable(0, 0)
         lang = data.getactive()
         self.appinit(self.root, lang)
         self.root.mainloop()

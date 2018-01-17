@@ -44,20 +44,38 @@ class CHARGEN:
         self.charstats["weig"] = weight
         height = generate_height(self.charstats['gend'], self.charstats['race'], self.lang)
         self.charstats['heig'] = height
+        mark = generate_d100()
+        self.charstats['mark'] = mark
+        self.generate_birthplace()
+        sib = generate_siblings(self.charstats['race'], self.lang)
+        self.charstats['bros'] = sib
+        star = generate_d100()
+        self.charstats['star'] = star
+
+    def generate_birthplace(self):
+        '''This function generates birthplace for character.
+        It's a separte function because it need to be rerolled
+        when race is changed'''
+        birth = generate_birthplace(self.charstats['race'], self.lang)
+        self.charstats['birth'] = birth[0]
+        try:
+            self.charstats['birthdetail'] = birth[1]
+        except IndexError:
+            self.charstats['birthdetail'] = None
 
 
     def relatedskills(self):
         '''This function calculates skills which are related to other stats'''
         if self.charstats['s'] is not None:
-            strength = self.charstats['s']
-            strength = str(strength)
-            strength = strength[0][:1]
-            print(strength)
+            power = self.charstats['s']
+            power = str(power)
+            power = power[0][:1]
+            self.charstats['power'] = power
 
     def generatelables(self, master):
-        '''This function will generate static labels for character generation menu'''
+        '''This function will generate static labels for character generation menu
+            It will only generate main skills'''
         labels = data.getstatsdesc(self.lang)
-        race = self.charstats['race']
         generatelabels(master, labels)
         stats = data.getvisiblestats()
         padd = [3, 3]
@@ -66,18 +84,9 @@ class CHARGEN:
             stat = statid - 2
             statval = stats[stat]
             statistic = " "
-            if statval == 'hair' and self.charstats['hair'] != None:
-                statistic = data.gethair(self.lang, self.charstats['hair'], race)
-            elif statval == 'age' and self.charstats['age'] != None:
-                statistic = data.getage(self.lang, self.charstats['age'], race)
-            elif statval == 'eye' and self.charstats['eye'] != None:
-                statistic = data.geteye(self.lang, self.charstats['eye'], race)
-            elif statval == 'weig' and self.charstats['weig'] != None:
-                statistic = data.getweight(self.lang, self.charstats['weig'], race)
-            elif self.charstats['ws'] != None:
-                statistic = self.charstats[statval]
+            statistic = self.labels_mapping(statval, master)
             labl = tk.Label(master, text=statistic, bg="white",
-                            fg="black", bd="10", width="8")
+                            fg="black", bd="10", width="10")
             if statid <= 5:
                 labl.grid(row=statid, column="1", pady=padd[0], padx=padd[1])
             elif statid <= 9:
@@ -86,17 +95,47 @@ class CHARGEN:
             elif statid <= 11:
                 i = statid - 6
                 labl.grid(row=i, column="6", pady=padd[0], padx=padd[1])
-            elif statid <= 14:
+            elif statid <= 15:
                 i = statid - 10
                 labl.grid(row=i, column="8", pady=padd[0], padx=padd[1])
-            elif statid <= 17:
-                i = statid - 13
+            elif statid <= 18:
+                labl = tk.Label(master, text=statistic, bg="white",
+                                fg="black", bd="10", width="15")
+                i = statid - 14
                 labl.grid(row=i, column="10", pady=padd[0], padx=padd[1])
-        birthplace = " "
-        birthlbl = tk.Label(master, text=birthplace, bg="white",
-                            fg="black", bd="10", width="15")
-        birthlbl.grid(row=5, column=8, pady="5", padx="5",
-                      columnspan=3, sticky="w")
+
+    def labels_mapping(self, statval, master):
+        '''Maps id with label text for given statistic'''
+        race = self.charstats['race']
+        padd = [3, 3]
+        statistic = " "
+        if statval == 'hair' and self.charstats['hair'] != None:
+            statistic = data.gethair(self.lang, self.charstats['hair'], race)
+        elif statval == 'age' and self.charstats['age'] != None:
+            statistic = data.getage(self.lang, self.charstats['age'], race)
+        elif statval == 'eye' and self.charstats['eye'] != None:
+            statistic = data.geteye(self.lang, self.charstats['eye'], race)
+        elif statval == 'weig' and self.charstats['weig'] != None:
+            statistic = data.getweight(self.lang, self.charstats['weig'], race)
+        elif statval == 'mark' and self.charstats['mark'] != None:
+            statistic = data.getmark(self.lang, self.charstats['mark'])
+        elif statval == 'birth' and self.charstats['birth'] != None:
+            if self.charstats['birthdetail'] != None:
+                statistic = data.getbirthdetails(self.charstats['birthdetail'], self.lang)
+                labl = tk.Label(master, text=statistic, bg="white",
+                                fg="black", bd="10", width="15")
+                labl.grid(row=5, column="10", pady=padd[0], padx=padd[1])
+            else:
+                statistic = " "
+                labl = tk.Label(master, text=statistic, bg="white",
+                                fg="black", bd="10", width="15")
+                labl.grid(row=5, column="10", pady=padd[0], padx=padd[1])
+            statistic = data.getbirthplace(self.charstats['birth'], self.lang)
+        elif statval == 'star' and self.charstats['star'] != None:
+            statistic = data.getstar(self.charstats['star'], self.lang)
+        elif self.charstats['ws'] != None:
+            statistic = self.charstats[statval]
+        return statistic
 
     def racecheck(self):
         '''This method checks what race is selected and applies stat changes'''
@@ -155,6 +194,8 @@ class CHARGEN:
                 self.charstats["fel"] = self.charstats["bs"] - 10
                 self.charstats["heig"] = self.charstats["heig"] - 100
         self.racecheck()
+        if self.charstats['birth'] != None:
+            self.generate_birthplace()
         self.relatedskills()
         self.generatelables(self.character)
 
@@ -329,7 +370,7 @@ def generatelabels(master, labels):
     for label in labels:
         labl = tk.Label(master, text=label)
         labl.grid(row=pos, column=col, pady="5", padx="5")
-        if pos > 4 and col == 0:
+        if pos > 4 and col == 0 and pos < 8:
             pos = 2
             col = 2
         elif pos > 4 and col == 2:
@@ -341,9 +382,9 @@ def generatelabels(master, labels):
         elif pos > 4 and col == 7:
             pos = 2
             col = 9
-        elif pos > 4 and col == 9:
+        elif pos > 3 and col == 9:
             pos = 8
-            col = 2
+            col = 0
         else:
             pos = pos + 1
 
@@ -379,7 +420,6 @@ def generateweight():
 
 def generate_height(gender, race, lang):
     '''Generates height of the character based on gender and race'''
-    print("DEBUG: gender value is: " + gender)
     genderid = data.mapmenutext(gender, lang)
     raceid = data.maprace(race, lang)
     roll1 = randint(1, 10)
@@ -405,8 +445,8 @@ def generate_height(gender, race, lang):
             height = 110 + totalroll
     return height
 
-def generate_mark():
-    '''This function will generate distinguishing mark for the character'''
+def generate_d100():
+    '''This function will generate id for details that need d100 for the character'''
     roll = randint(1, 100)
     if roll < 6:
         mark_id = 1
@@ -451,3 +491,75 @@ def generate_mark():
     else:
         mark_id = 21
     return mark_id
+
+def generate_birthplace(race, lang):
+    '''This function will generate birthplace for random character.
+    Due to complex nature of birthplace system in WFRP it will use two variables.
+    The birthplace type for human birthplace won't be kept in database with attributes.
+    Each race has different roll condition for birthplace.'''
+    race_id = data.maprace(race, lang)
+    if race_id == "humn":
+        result = (roll_human_birthplace())
+    elif race_id == "dwrs":
+        dice_roll = randint(1, 100)
+        if dice_roll <= 30:
+            result = (roll_human_birthplace())
+        else:
+            result = dwarf_birthplace(dice_roll)
+    elif race_id == 'elvs':
+        result = []
+        dice_roll = randint(1, 5)
+        dice_roll = dice_roll + 17
+        result.append(dice_roll)
+    elif race_id == 'hwfl':
+        dice_roll = randint(0, 1)
+        if dice_roll == 0:
+            result = []
+            result.append(23)
+        else:
+            result = (roll_human_birthplace())
+    return result
+
+def roll_human_birthplace():
+    '''Due to the fact that three races uses human birthplace table under
+    certain conditions I made it into separate function that generates human birthplace'''
+    dice_1 = randint(1, 10)
+    dice_2 = randint(1, 10)
+    return dice_1, dice_2
+
+def dwarf_birthplace(dice_roll):
+    '''Returns dwarf birthplace id based on dice roll value'''
+    result = []
+    if dice_roll <= 40:
+        result.append(11)
+    elif dice_roll <= 50:
+        result.append(12)
+    elif dice_roll <= 60:
+        result.append(13)
+    elif dice_roll <= 70:
+        result.append(14)
+    elif dice_roll <= 80:
+        result.append(15)
+    elif dice_roll <= 90:
+        result.append(16)
+    elif dice_roll <= 100:
+        result.append(17)
+    return result
+
+def generate_siblings(race, lang):
+    '''Returns number of siblings that character has'''
+    race_id = data.maprace(race, lang)
+    dice_roll = randint(1, 10)
+    if dice_roll < 2:
+        result = 1
+    elif dice_roll < 4:
+        result = 2
+    elif dice_roll < 6:
+        result = 3
+    elif dice_roll < 8:
+        result = 4
+    elif dice_roll < 10:
+        result = 5
+    else:
+        result = 6
+    return data.getsiblings(race_id, result)
