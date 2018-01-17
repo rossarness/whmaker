@@ -264,9 +264,9 @@ class CHARGEN:
         self.gendervalue.set(default_gender)
         label = data.getmenutext("prof_txt", lang)
         proflabel = tk.Label(self.character, text=label)
-        proflabel.grid(row="0", column="3", padx=10, columnspan=2, sticky="e")
+        proflabel.grid(row="0", column="3", padx=1, columnspan=2, sticky="e")
         prof = ttk.Combobox(self.character, textvariable="None", width=40)
-        prof.grid(row="0", column="5", columnspan=6, pady=5, padx=5, sticky="e")
+        prof.grid(row="0", column="5", columnspan=4, pady=5, padx=0, sticky="e")
         self.generatelables(self.character)
         createseparators(self.character, 7, 1)
 
